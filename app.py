@@ -59,7 +59,7 @@ def main():
 
 
 def predict(image):
-     classifier_model = "vgg19-model.h5"
+     classifier_model = "classify-vgg19-model-final.h5"
       
      model = load_model(classifier_model)
       
