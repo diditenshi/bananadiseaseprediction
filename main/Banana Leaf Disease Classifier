@@ -1,0 +1,164 @@
+#@title
+from google.colab import drive
+drive.mount('/content/drive')
+
+pip install tensorflow-addons
+
+import numpy as np 
+import pandas as pd 
+import cv2
+from PIL import Image, ImageOps
+import pathlib
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import tensorflow_addons as tfa
+%matplotlib inline
+from tensorflow.keras import layers, models, optimizers, preprocessing, applications
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.layers import Input, Lambda, Dense, Flatten,Dropout, GlobalAveragePooling2D
+from tensorflow.keras.layers import BatchNormalization, Activation
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam, RMSprop
+
+
+image_size = 224
+batch_size = 32
+
+# folders with train dir & val dir
+train_dir = '/content/drive/MyDrive/Banana-Disease-Classifier/Datasets/final-banana-diseases-dataset/train'
+val_dir = '/content/drive/MyDrive/Banana-Disease-Classifier/Datasets/final-banana-diseases-dataset/val'
+test_dir = '/content/drive/MyDrive/Banana-Disease-Classifier/Datasets/final-banana-diseases-dataset/test'
+input_shape = (image_size, image_size, 3)
+
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.models import Model
+import tensorflow.keras as keras
+
+train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input,
+                                              horizontal_flip = True,
+                                              width_shift_range = 0.2,
+                                              height_shift_range = 0.2
+                                                )
+
+train_generator = train_datagen.flow_from_directory(
+    train_dir,
+    target_size=(image_size, image_size),
+    batch_size=batch_size,
+    class_mode='categorical')
+
+test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+
+val_generator = test_datagen.flow_from_directory(
+    val_dir,
+    target_size=(image_size, image_size),
+    batch_size=batch_size,
+    class_mode='categorical')
+
+test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+
+test_generator = test_datagen.flow_from_directory(
+    test_dir,
+    target_size=(image_size, image_size),
+    batch_size=batch_size,
+    shuffle=False,
+    class_mode='categorical')
+
+train_generator.class_indices
+
+pretrained_model = ResNet50(include_top=False, weights='imagenet', input_shape=(image_size, image_size,3))
+#pretrained_model.summary()
+
+output = pretrained_model.layers[-1].output
+output = tf.keras.layers.Flatten()(output)
+pretrained_model = Model(pretrained_model.input, output)
+
+res_name = []
+for layer in pretrained_model.layers:
+    res_name.append(layer.name)
+
+res_name[-22:]
+
+set_trainable = False
+for layer in pretrained_model.layers:
+    if layer.name in res_name[-22:]:
+        set_trainable = True
+    if set_trainable:
+        layer.trainable = True
+    else:
+        layer.trainable = False
+
+pretrained_model.summary()
+
+import os
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, GlobalAveragePooling2D, Dropout
+
+#filepath='/content/drive/MyDrive/Banana-Disease-Classifier/Final-Classifier/Training-Checkpoints/Resnet50-Checkpoints/resnet50_best-1.h5'
+#checkpoint_dir = os.path.dirname(filepath)
+#checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=1, 
+#                             save_best_only=True, mode='min')
+learning_rate_reduction = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', 
+                                            patience=10, 
+                                            verbose=1, 
+                                            factor=0.5, 
+                                            min_lr=0.00001)
+early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10,
+                                              restore_best_weights=False
+                                              )
+callbacks_list = [learning_rate_reduction,early_stop]
+
+num_classes = 5
+
+model = Sequential()
+model.add(pretrained_model)
+model.add(Dense(1024, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(1024, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
+
+model.summary()
+
+adam = tf.keras.optimizers.Adam(learning_rate=0.0001)
+model.compile(optimizer = adam, loss = 'categorical_crossentropy', metrics=['accuracy',tfa.metrics.F1Score(num_classes=num_classes)])
+
+steps_per_epoch = 40
+history = model.fit(
+    train_generator,
+    steps_per_epoch=steps_per_epoch,
+    validation_data=val_generator,
+    validation_steps=5,
+    callbacks=callbacks_list,
+    epochs=20,verbose=2)
+
+test_score = model.evaluate_generator(test_generator, batch_size)
+
+print("[INFO] accuracy: {:.2f}%".format(test_score[1] * 100)) 
+print("[INFO] Loss: ",test_score[0])
+
+#Plot the Graph
+
+# Loss Curves
+plt.figure(figsize=[8,6])
+plt.plot(history.history['loss'],'r',linewidth=3.0)
+plt.plot(history.history['val_loss'],'b',linewidth=3.0)
+plt.legend(['Training loss', 'Validation Loss'],fontsize=18)
+plt.xlabel('Epochs ',fontsize=16)
+plt.ylabel('Loss',fontsize=16)
+plt.title('Loss Curves',fontsize=16)
+  
+# Accuracy Curves
+plt.figure(figsize=[8,6])
+plt.plot(history.history['accuracy'],'r',linewidth=3.0)
+plt.plot(history.history['val_accuracy'],'b',linewidth=3.0)
+plt.legend(['Training Accuracy', 'Validation Accuracy'],fontsize=18)
+plt.xlabel('Epochs ',fontsize=16)
+plt.ylabel('Accuracy',fontsize=16)
+plt.title('Accuracy Curves',fontsize=16)
+
+model.save('/content/drive/MyDrive/Banana-Disease-Classifier/Streamlit app file/resnet50-model.h5')
