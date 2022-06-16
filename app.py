@@ -65,7 +65,7 @@ def predict(image):
       
      test_image = image.resize((224,224))
      test_image = preprocessing.image.img_to_array(test_image)
-     test_image = keras.applications.imagenet_utils.preprocess_input(test_image)
+     test_image = test_image / 255.0
      test_image = np.expand_dims(test_image, axis=0)
      class_names = {0 : 'healthy', 1 : 'bunchy top', 2 : 'fusarium wilt', 3 : 'moko', 4 : 'sigatoka'}
 
