@@ -86,4 +86,4 @@ a:hover,  a:active {
 }
 
 “”” st.markdown(footer, unsafe_allow_html = True) if __name__ 
-== ‘__main__’ : main()
+== ‘__main__’ : main() 
