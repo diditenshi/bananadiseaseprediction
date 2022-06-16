@@ -49,7 +49,7 @@ def main():
 
 
 def predict(image):
-     classifier_model = "resnet50-model.h5"
+     classifier_model = "vgg19-model.h5"
       
      model = load_model(classifier_model)
       
