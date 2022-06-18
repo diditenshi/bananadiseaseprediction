@@ -67,13 +67,8 @@ def predict(image):
      test_image = preprocessing.image.img_to_array(test_image)
      test_image = test_image / 255.0
      test_image = np.expand_dims(test_image, axis=0)
-     class_names = {0 : 'Healthy', 1 : 'Bunchy Top Disease', 2 : 'Fusarium Wilt Disease', 3 : 'Moko (Bacterial Wilt) Disease', 4 : 'Sigatoka Disease'}
-     prev0 = "'Your text'"
-     prev1 = "'Your text'"
-     prev2 = "'Your text'"
-     prev3 = "'Your text'"
-          
-     class_care_options = {0 : prev0, 1 : prev1, 2 : prev2, 3 : prev3, 4 : prev4}
+     class_names = {0 : 'Healthy', 1 : 'Bunchy Top Disease', 2 : 'Fusarium Wilt Disease', 3 : 'Moko (Bacterial Wilt) Disease', 4 : 'Sigatoka Disease'}        
+     class_care_options = {0 : 'prev0', 1 : 'prev1', 2 : 'prev2', 3 : 'prev3', 4 : 'prev4'}
 
      predictions = model.predict(test_image)
      scores = tf.nn.softmax(predictions[0])
