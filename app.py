@@ -83,8 +83,8 @@ def predict(image):
      result = f" The banana plant is infected with {class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence" 
      return result
 
-     prev-con = f" The disease can be prevented using the ff. options {class_care_options[np.argmax(scores)]}."
-
+     prevcon = f" The disease can be prevented using the ff. options {class_care_options[np.argmax(scores)]}"
+     return prevcon
 
 ## -----------------------------------------------------x---------------------------------------x--------------------------------------------##
 
