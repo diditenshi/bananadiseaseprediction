@@ -68,13 +68,14 @@ def predict(image):
      test_image = test_image / 255.0
      test_image = np.expand_dims(test_image, axis=0)
      class_names = {0 : 'healthy', 1 : 'bunchy top', 2 : 'fusarium wilt', 3 : 'moko', 4 : 'sigatoka'}
+     class_care_options = {0 : 'plant1', 1 : 'plant2', 2 : 'plant3', 3 : 'plant4', 4 : 'plant5'}
 
      predictions = model.predict(test_image)
      scores = tf.nn.softmax(predictions[0])
      scores = scores.numpy()
 
     
-     result = f"{class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence." 
+     result = f"{class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence and must be prevented using the ff. option {class_care_options[np.argmax(scores)]}." 
      return result
 
 
