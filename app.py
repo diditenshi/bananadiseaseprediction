@@ -68,15 +68,22 @@ def predict(image):
      test_image = test_image / 255.0
      test_image = np.expand_dims(test_image, axis=0)
      class_names = {0 : 'Healthy', 1 : 'Bunchy Top Disease', 2 : 'Fusarium Wilt Disease', 3 : 'Moko (Bacterial Wilt) Disease', 4 : 'Sigatoka Disease'}
-     class_care_options = {0 : 'plant1', 1 : 'plant2', 2 : 'plant3', 3 : 'plant4', 4 : 'plant5'}
+     prev0 = "'Your text'"
+     prev1 = "'Your text'"
+     prev2 = "'Your text'"
+     prev3 = "'Your text'"
+          
+     class_care_options = {0 : prev0, 1 : prev1, 2 : prev2, 3 : prev3, 4 : prev4}
 
      predictions = model.predict(test_image)
      scores = tf.nn.softmax(predictions[0])
      scores = scores.numpy()
 
     
-     result = f" The banana plant is infected with {class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence and must be prevented using the ff. options {class_care_options[np.argmax(scores)]}." 
+     result = f" The banana plant is infected with {class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence" 
      return result
+
+     prev-con = f" The disease can be prevented using the ff. options {class_care_options[np.argmax(scores)]}."
 
 
 ## -----------------------------------------------------x---------------------------------------x--------------------------------------------##
