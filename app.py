@@ -33,7 +33,7 @@ st.title('Banana Disease Classifier')
 st.markdown("Prediction of the Banana Diseases: Bunchy Top, Moko, Sigatoka and Fusarium Wilt")
 
 def main():
-    file_uploaded = st.file_uploader("Select Image", type=["png","jpg","jpeg"])
+    file_uploaded = st.file_uploader("Select an image of the banana plant leaf", type=["png","jpg","jpeg"])
     if file_uploaded is not None:    
         image = Image.open(file_uploaded)
         st.image(image, caption='Uploaded Image', use_column_width=True)
@@ -50,7 +50,7 @@ def main():
                 predictions = predict(image)
 
                 time.sleep(1)
-                st.success('Classified')
+                st.success('The image has been successfully classified.')
                 st.write(predictions)
 
 
@@ -68,15 +68,21 @@ def predict(image):
      test_image = test_image / 255.0
      test_image = np.expand_dims(test_image, axis=0)
      class_names = {0 : 'Healthy', 1 : 'Bunchy Top Disease', 2 : 'Fusarium Wilt Disease', 3 : 'Moko (Bacterial Wilt) Disease', 4 : 'Sigatoka Disease'}        
-     class_care_options = {0 : 'prev0', 1 : 'prev1', 2 : 'prev2', 3 : 'prev3', 4 : 'prev4'}
+     
+     prev1 = '''the conduct early detection survey of initial symptoms, eradicate promptly and enforce strict quarantine measures.'''
+     prev2 = '''strict quarantine measures to prevent the transfer of diseased planting materials into new areas since no economical method to eliminate the fungus from an infested soil is not yet available.'''
+     prev3 = '''early detection and immediate eradication of the infected plants.'''
+     prev4 = '''application of contact fungicides to kill fungal growth inside the leaf.'''
+      
+     class_care_options = {1 : prev1, 2 : prev2, 3 : prev3, 4 : prev4}
 
      predictions = model.predict(test_image)
      scores = tf.nn.softmax(predictions[0])
      scores = scores.numpy()
 
-    
-     result = f" The banana plant is infected with {class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence. The disease can be prevented using the ff. options {class_care_options[np.argmax(scores)]}" 
+     result = f"The result of the classification is {class_names[np.argmax(scores)]} with a { (100 * np.max(scores)).round(2) } % confidence. Prevention and control measures include {class_care_options[np.argmax(scores)]}"
      return result
+   
 
 ## -----------------------------------------------------x---------------------------------------x--------------------------------------------##
 
